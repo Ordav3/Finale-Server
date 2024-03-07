@@ -1,546 +1,247 @@
-# Getting Started with node server App
+# Finale Server API Documentation
 
-## Installation
+This document provides all the necessary information to get started with the Finale Server, including how to install and run the server, as well as detailed descriptions of the available API endpoints.
 
-Enter to the server folder
+## Getting Started
 
-```bash
-cd server
-```
+### Installation
 
-Install the node_modules
+To set up the Finale Server on your local machine, follow these steps:
 
-```bash
-npm i
-```
+1. Clone the repository:
 
-## Available Scripts
+   ```bash
+   git clone https://github.com/Ordav3/Finale-Server.git
+   ```
 
-you can run:
+2. Change into the project directory:
+
+   ```bash
+   cd Finale-Server
+   ```
+
+3. Install the required node modules:
+   ```bash
+   npm install
+   ```
+
+## Running the Server
+
+You have a couple of options for running the Finale Server:
 
 ### `npm start`
 
-- It will run the app with node
-- The page will not reload if you make edits.
+- This command will run the app using node. Note that the page will not reload if you make edits.
 
 ### `npm run dev`
 
-- Runs the app with nodemon
-- The page will reload if you make edits
-- The print at the terminal will be purple with the message:
+- This runs the app with nodemon, which will automatically reload the page if you make edits.
+- Terminal output for a successful run should display:
+  ```plaintext
+  server run on: http://localhost:8181/
+  ```
+  and upon successful database connection:
+  ```plaintext
+  connected to MongoDb!
+  ```
 
-`server run on: http://localhost:8181/`
+## API Endpoints
 
-And if there are no login errors you should see the message painted in purple:
+The server provides a set of endpoints for managing users and cards:
 
-`connected to MongoDb!`
+### User Operations
 
-### Available Routes
+- **Register a New User**
+  ```http
+  POST /api/users
+  ```
+- **Login a User**
+  ```http
+  POST /api/users/login
+  ```
+- **Get All Users (Admin only)**
+  ```http
+  GET /api/users
+  ```
+- **Get Logged-in User's Information**
+  ```http
+  GET /api/users/userInfo
+  ```
+- **Update Logged-in User's Information**
+  ```http
+  PUT /api/users/userInfo/:id
+  ```
+- **Delete a User (Admin only)**
+  ```http
+  DELETE /api/users/:id
+  ```
 
-#### Register a new user
+### Card Operations
 
-```http
-  POST /api/users/register
-```
+- **Get All Cards**
+  ```http
+  GET /api/cards
+  ```
+- **Get Logged-in User's Cards**
+  ```http
+  GET /api/cards/my-cards
+  ```
+- **Get Logged-in User's Favorite Cards**
+  ```http
+  GET /api/cards/fav
+  ```
+- **Get a Specific Card**
+  ```http
+  GET /api/cards/:id
+  ```
+- **Create a New Card (Admin only)**
+  ```http
+  POST /api/cards
+  ```
+- **Update a Card (Admin only)**
+  ```http
+  PUT /api/cards/:id
+  ```
+- **Like/Unlike a Card**
+  ```http
+  PATCH /api/cards/:id
+  ```
+- **Delete a Card (Admin only)**
+  ```http
+  DELETE /api/cards/:id
+  ```
 
-request:
+## Validations and Constraints
+
+- All endpoints that require user authentication expect an auth token in the request headers.
+- Payloads are validated using Joi, and any validation errors will result in a `400 Bad Request` response.
+- Authorization is required for certain operations, and unauthorized access will result in a `403 Forbidden` or `404 Not Found` response.
+- Server-side errors will result in a `500 Internal Server Error` response.
+
+# Card Schema
+
+- title:
+  -- string
+  -- required
+  -- min 1
+  -- max 256
+- subTitle:
+  -- string
+  -- required
+  -- min 1
+  -- max 256
+- description:
+  -- string
+  -- required
+  -- min 1
+  -- max 1024
+- phone:
+  -- string
+  -- required
+  -- regex pattern: /^[0-9]{10}$/
+- email:
+  -- string
+  -- required
+  -- min 1
+  -- max 256
+- web:
+  -- string
+  -- max 1024
+- state:
+  -- string
+  -- max 256
+- country:
+  -- string
+  -- required
+  -- min 1
+  -- max 256
+- city:
+  -- string
+  -- required
+  -- min 1
+  -- max 256
+- street:
+  -- string
+  -- required
+  -- min 1
+  -- max 256
+- houseNumber:
+  -- number
+  -- required
+- zip:
+  -- number
+  -- max 99999999
+- url:
+  -- string
+  -- regex pattern: /^(https?:\/\/)?[^\s\/]+\.[^\s\/]+\/\S+\.(jpg|jpeg|png|gif)$/
+- alt:
+  -- string
+  -- max 256
+- likes:
+  -- array of strings
+- createdAt:
+  -- date
+- user_id:
+  -- ObjectId (reference to User model)
+
+# User Schema
 
 - firstName:
   -- string
   -- required
   -- min 2
-  -- max 256
+  -- max 15
 - middleName:
   -- string
-  -- min 2
-  -- max 256
+  -- max 15
 - lastName:
   -- string
   -- required
   -- min 2
-  -- max 256
+  -- max 15
 - phone:
   -- string
   -- required
-  -- min 9
-  -- max 14
+  -- regex pattern: /^[0-9]{10}$/
 - email:
   -- string
   -- required
-  -- must be email
-  -- min 6
   -- max 256
+  -- unique
 - password:
   -- string
   -- required
-  -- min 6
-  -- max 1024
 - imageUrl:
   -- string
-  -- min 6
   -- max 1024
 - imageAlt:
   -- string
-  -- min 6
   -- max 256
 - state:
   -- string
-  -- min 2
   -- max 256
 - country:
   -- string
   -- required
-  -- min 2
   -- max 256
 - city:
   -- string
   -- required
-  -- min 2
   -- max 256
 - street:
   -- string
   -- required
-  -- min 2
   -- max 256
 - houseNumber:
   -- string
   -- required
-  -- min 1
   -- max 256
-- zipCode:
-  -- number
-  -- min 1
-  -- max 99999999
-- biz:
+- zip:
+  -- string
+  -- max 256
+- createdAt:
+  -- date
+  -- default to current date/time
+- isAdmin:
   -- boolean
-  -- true/false
-
-#### Login a user
-
-```http
-  POST /api/users/login
-```
-
-request:
-
-- email:
-  -- string
-  -- required
-  -- must be email
-  -- min 6
-  -- max 256
-- password:
-  -- string
-  -- required
-  -- min 6
-  -- max 1024
-
-#### For Information about a user
-
-```http
-  GET /api/users/userInfo
-```
-
-request:
-
-- must provide token
-
-You will need to provide a token to get an answer from this api
-
-#### For User information update
-
-```http
-  PUT /api/users/userInfo
-```
-
-request:
-
-- must provide token
-
-* firstName:
-  -- string
-  -- required
-  -- min 2
-  -- max 256
-* middleName:
-  -- string
-  -- min 2
-  -- max 256
-* lastName:
-  -- string
-  -- required
-  -- min 2
-  -- max 256
-* phone:
-  -- string
-  -- required
-  -- min 9
-  -- max 14
-* email:
-  -- string
-  -- required
-  -- must be email
-  -- min 6
-  -- max 256
-* imageUrl:
-  -- string
-  -- min 6
-  -- max 1024
-* imageAlt:
-  -- string
-  -- min 6
-  -- max 256
-* state:
-  -- string
-  -- min 2
-  -- max 256
-* country:
-  -- string
-  -- required
-  -- min 2
-  -- max 256
-* city:
-  -- string
-  -- required
-  -- min 2
-  -- max 256
-* street:
-  -- string
-  -- required
-  -- min 2
-  -- max 256
-* houseNumber:
-  -- string
-  -- required
-  -- min 1
-  -- max 256
-* zipCode:
-  -- number
-  -- min 1
-  -- max 99999999
-* biz:
-  -- boolean
-  -- true/false
-
-You will need to provide a token to get an answer from this api
-You need to be admin
-
-#### For User information update
-
-```http
-  PUT /api/users/userInfo/:id
-```
-
-request:
-
-- must provide token
-  \*\* must be registered as admin
-
-* firstName:
-  -- string
-  -- required
-  -- min 2
-  -- max 256
-* middleName:
-  -- string
-  -- min 2
-  -- max 256
-* lastName:
-  -- string
-  -- required
-  -- min 2
-  -- max 256
-* phone:
-  -- string
-  -- required
-  -- min 9
-  -- max 14
-* email:
-  -- string
-  -- required
-  -- must be email
-  -- min 6
-  -- max 256
-* imageUrl:
-  -- string
-  -- min 6
-  -- max 1024
-* imageAlt:
-  -- string
-  -- min 6
-  -- max 256
-* state:
-  -- string
-  -- min 2
-  -- max 256
-* country:
-  -- string
-  -- required
-  -- min 2
-  -- max 256
-* city:
-  -- string
-  -- required
-  -- min 2
-  -- max 256
-* street:
-  -- string
-  -- required
-  -- min 2
-  -- max 256
-* houseNumber:
-  -- string
-  -- required
-  -- min 1
-  -- max 256
-* zipCode:
-  -- number
-  -- min 1
-  -- max 99999999
-* biz:
-  -- boolean
-  -- true/false
-
-You will need to provide a token to get an answer from this api
-You need to be admin to delete
-
-#### For Information about a user
-
-```http
-  DELETE /api/users/deleteUser/:id
-```
-
-- must provide token
-  \*\* must be registered as admin
-
-You will need to provide a token to get an answer from this api
-
-#### To receive all business cards
-
-```http
-  GET /api/cards/cards
-```
-
-#### To get a business card of a specific business
-
-```http
-  GET /api/cards/card/:id
-```
-
-#### To receive all business cards of the registered user
-
-```http
-  GET /api/cards/my-cards
-```
-
-- must provide token
-  You will need to provide a token to get an answer from this api
-
-#### To create a new business card
-
-```http
-  POST /api/cards/
-```
-
-request:
-
-- must provide token
-  \*\* must registered as biz user
-
-* title:
-  -- string
-  -- required
-  -- min 2
-  -- max 256
-* subTitle:
-  -- string
-  -- required
-  -- min 2
-  -- max 256
-* description:
-  -- string
-  -- required
-  -- min 2
-  -- max 1024
-* state:
-  -- string
-  -- min 2
-  -- max 256
-* country:
-  -- string
-  -- required
-  -- min 2
-  -- max 256
-* city:
-  -- string
-  -- required
-  -- min 2
-  -- max 256
-* street:
-  -- string
-  -- required
-  -- min 2
-  -- max 256
-* houseNumber:
-  -- string
-  -- required
-  -- min 1
-  -- max 256
-* zipCode:
-  -- number
-  -- min 1
-  -- max 99999999
-* phone:
-  -- string
-  -- required
-  -- min 9
-  -- max 14
-* email:
-  -- string
-  -- required
-  -- must be email
-  -- min 6
-  -- max 256
-* web:
-  // link to website of the buissness
-  -- string
-  -- min 5
-  -- max 255
-* url:
-  // image with the buissness card
-  -- string
-  -- min 6
-  -- max 1024
-* alt:
-  // image alt
-  -- string
-  -- min 2
-  -- max 256
-  You will need to provide a token to get an answer from this api
-
-#### To update a business card
-
-```http
-  PUT /api/cards/:id
-```
-
-request:
-
-- must provide token
-  \*\* must registered as biz user or admin user
-
-* title:
-  -- string
-  -- required
-  -- min 2
-  -- max 256
-* subTitle:
-  -- string
-  -- required
-  -- min 2
-  -- max 256
-* description:
-  -- string
-  -- required
-  -- min 2
-  -- max 1024
-* state:
-  -- string
-  -- min 2
-  -- max 256
-* country:
-  -- string
-  -- required
-  -- min 2
-  -- max 256
-* city:
-  -- string
-  -- required
-  -- min 2
-  -- max 256
-* street:
-  -- string
-  -- required
-  -- min 2
-  -- max 256
-* houseNumber:
-  -- string
-  -- required
-  -- min 1
-  -- max 256
-* zipCode:
-  -- number
-  -- min 1
-  -- max 99999999
-* phone:
-  -- string
-  -- required
-  -- min 9
-  -- max 14
-* email:
-  -- string
-  -- required
-  -- must be email
-  -- min 6
-  -- max 256
-* web:
-  // link to website of the buissness
-  -- string
-  -- min 5
-  -- max 255
-* url:
-  // image with the buissness card
-  -- string
-  -- min 6
-  -- max 1024
-* alt:
-  // image alt
-  -- string
-  -- min 6
-  -- max 256
-  You will need to provide a token to get an answer from this api
-
-#### To update a business card number
-
-```http
-  PATCH /api/cards/bizNumber/:bizId
-```
-
-must provide token
-\*\* must registered as admin user
-You will need to provide a token to get an answer from this api
-
-#### To delete a business card
-
-```http
-  DELETE /api/cards/:id
-```
-
-- must provide token
-  \*\* must registered as biz user or admin user
-  You will need to provide a token to get an answer from this api
-
-#### To update card like
-
-```http
-	PATCH /api/cards/card-like/:id
-```
-
-- must provide token
-
-#### To get all fav cards
-
-```http
-  GET /api/cards/get-my-fav-cards
-```
-
-- must provide token
-
-#### To get all users
-
-```http
-  GET /api/users/getAllUsers
-```
-
-- must provide token
-- must be admin
+  -- default false

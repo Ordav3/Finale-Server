@@ -23,7 +23,7 @@ router.post("", async (req, res) => {
     return res.status(400).send(error.details[0].message);
   }
 
-  let user = await User.findOne({ email: req.body.email });
+  let user = await User.findOne({ email: req.body.email.toLowerCase() });
   if (user) {
     return res.status(409).send("User already exists.");
   }
@@ -40,7 +40,7 @@ router.post("/login", async (req, res) => {
     return res.status(400).send(error.details[0].message);
   }
 
-  let user = await User.findOne({ email: req.body.email });
+  let user = await User.findOne({ email: req.body.email.toLowerCase() });
 
   if (!user) {
     return res.status(401).send("Invalid email or password.");
@@ -68,25 +68,6 @@ router.get("", auth, async (req, res) => {
   }
 });
 
-// router.get("/:id", auth, (req, res) => {
-//   let user = req.user;
-//   if (!(user._id.toString() == req.params.id || user.isAdmin)) {
-//     res.status(404).send("Authorization Error");
-//     return;
-//   }
-
-//   User.findById(user._id)
-//     .select(["-password", "-createdAt", "-__v"])
-//     .then((user) => {
-//       if (user) {
-//         res.send(user);
-//       } else {
-//         res.status(404).send("User not found");
-//       }
-//     })
-//     .catch((errorsFromMongoose) => res.status(500).send(errorsFromMongoose));
-// });
-
 router.get("/userInfo", auth, (req, res) => {
   let user = req.user;
   if (!user) {
@@ -111,12 +92,11 @@ router.put("/userInfo/:id", auth, async (req, res) => {
     return;
   }
   try {
-  
     const { error } = validateEditUser(req.body);
     if (error) {
       return res.status(400).send(error.details[0].message);
     }
-  
+
     await User.findByIdAndUpdate(req.user._id, req.body);
     res.json({ msg: "Done" });
   } catch (err) {
